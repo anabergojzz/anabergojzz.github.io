@@ -1,0 +1,114 @@
+map gt cd ~/tmp
+set shellopts '-eu'
+set ifs "\n"
+set scrolloff 10 # leave some space at the top and the bottom of the screen
+
+set icons
+set incsearch
+set info size
+set previewer print
+set shell sh
+
+set mouse on
+map <m-up> up
+map <m-down> down
+map <m-1> updir
+map <m-2> open
+map <m-3> cd ~/
+
+map gd cd ~/doc
+map gp cd ~/prt
+map guu cd ~/usr
+map gus cd ~/usr/slike
+map gug cd ~/usr/glasba
+map guv cd ~/usr/video
+map gud cd ~/usr/literatura
+map gloc cd ~/.local
+map gcfg cd ~/.config
+map gm cd /media/
+map gr cd /
+map gT cd ~/.trash
+map gss cd ~/sl
+map gsp cd ~/sl/prt
+map gsd cd ~/sl/drugo
+
+map D trash
+map u :clear;unselect
+map A rename # at the very end
+map c push A<a-b><c-b><c-u> # before extention
+map C push A<c-u> # before extention
+map I push A<c-a> # at the very beginning
+map i push A<a-b><c-b> # before extention
+map a push A<a-b> # after extention
+map B bulkrename
+map <enter> shell # use enter for shell commands
+map <delete> delete
+map T delete
+map r $$PAGER "$f"
+
+map x $$f
+map X !$f
+
+#map o &mimeopen $f
+map o ${{ 
+    mimetype=$(file --mime-type -b "$f") 
+    if grep -Eh "^$mimetype;" /etc/mailcap ~/.mailcap 2>/dev/null | grep -q "needsterminal"; then
+        setsid -f run-mailcap "$f"  2> /dev/null 1> /dev/null &
+    else
+        run-mailcap "$f"
+    fi
+}}
+map O $mimeopen --ask $f
+#cmd open $setsid -f run-mailcap $f 2> /dev/null 1> /dev/null
+#cmd open $run-mailcap --action=view $f
+cmd open ${{ 
+    mimetype=$(file --mime-type -b "$f") 
+    if grep -Eh "^$mimetype;" /etc/mailcap ~/.mailcap 2>/dev/null | grep -q "needsterminal"; then
+        run-mailcap --action=view "$f"
+    else
+        setsid -f run-mailcap "$f"  2> /dev/null 1> /dev/null &
+    fi
+}}
+
+%mkdir -p ~/.trash
+cmd trash %set -f; mv $fx ~/.trash
+
+cmd delete ${{
+    set -f
+    printf "$fx\n"
+    printf "delete?[y/n]"
+    read ans
+    [ $ans = "y" ] && rm -rf $fx
+}}
+
+cmd bulkrename $(qmv -f do)
+
+cmd extract ${{
+    set -f
+    case $f in
+        *.tar.bz|*.tar.bz2|*.tbz|*.tbz2) tar xjvf $f;;
+        *.tar.gz|*.tgz) tar xzvf $f;;
+        *.tar.xz|*.txz) tar xJvf $f;;
+        *.zip) unzip $f;;
+        *.rar) unrar x $f;;
+        *.7z) 7z x $f;;
+    esac
+}}
+
+cmd tar ${{
+    set -f
+    mkdir $1
+    cp -r $fx $1
+    tar czf $1.tar.gz $1
+    rm -rf $1
+}}
+
+cmd zip ${{
+    set -f
+    mkdir $1
+    cp -r $fx $1
+    zip -r $1.zip $1
+    rm -rf $1
+}}
+
+map Y $printf "%s" "$fx" | xclip -selection clipboard
