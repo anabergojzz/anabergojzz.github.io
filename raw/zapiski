@@ -1,5 +1,0 @@
-#!/bin/sh
-
-cd ~/doc/zapiski/
-
-st -e vim ./glavna.md

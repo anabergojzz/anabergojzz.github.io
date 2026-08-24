@@ -1,6 +1,0 @@
-#!/bin/sh
-
-chosen=$(cat $HOME/doc/zapiski/bookmarks.md | dmenu -i -l 30)
-link=$(echo "$chosen" | awk '{print $NF}')
-
-echo $link | xclip -selection clipboard
